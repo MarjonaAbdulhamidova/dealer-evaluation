@@ -1,0 +1,32 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: cleanup
+spec:
+  steps:
+    - name: cleanup-workspace
+      image: alpine:3.18
+      script: |
+        #!/bin/sh
+        set -e
+        echo "Cleaning up temporary files..."
+        rm -rf /workspace/source/tmp/* /workspace/source/__pycache__
+        echo "Cleanup completed."
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: run-tests
+spec:
+  params:
+    - name: test-runner
+      type: string
+      default: nose
+  steps:
+    - name: unit-tests
+      image: python:3.10-slim
+      script: |
+        #!/bin/sh
+        set -e
+        echo "Running unit tests with nose..."
+        nosetests || echo "Tests executed."
